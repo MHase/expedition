@@ -1,5 +1,4 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { authClient } from "@/lib/auth-client";
 
@@ -15,35 +14,11 @@ function Index() {
 		refetch, //refetch the session
 	} = authClient.useSession();
 
-	const handleSignIn = async () => {
-		await authClient.signIn.email(
-			{
-				email: "maciek.sykula@gmail.com",
-				password: "qweqweqwe",
-				// callbackURL: "/",
-			},
-			{
-				onError: (ctx) => {
-					toast.error(ctx.error.message);
-				},
-			},
-		);
-	};
-
-	const handleSignUp = async () => {
-		await authClient.signUp.email(
-			{
-				name: "Maciuś",
-				email: "maciek.sykula@gmail.com",
-				password: "qweqweqwe",
-				// callbackURL: "/",
-			},
-			{
-				onError: (ctx) => {
-					toast.error(ctx.error.message);
-				},
-			},
-		);
+	const handleGoogleSignIn = async () => {
+		await authClient.signIn.social({
+			provider: "google",
+			callbackURL: "http://localhost:5173",
+		});
 	};
 
 	return (
@@ -55,8 +30,7 @@ function Index() {
 			<pre>{JSON.stringify({ error }, null, 2)}</pre>
 			<pre>{JSON.stringify({ refetch }, null, 2)}</pre>
 
-			<Button onClick={handleSignIn}>Sign In</Button>
-			<Button onClick={handleSignUp}>Sign Up</Button>
+			<Button onClick={handleGoogleSignIn}>Google Sign In</Button>
 			<Button onClick={() => authClient.signOut()}>Logout</Button>
 		</div>
 	);
