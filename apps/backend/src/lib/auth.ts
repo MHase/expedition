@@ -36,7 +36,7 @@ const config = (env: HonoEnv["Bindings"]) => ({
 			enabled: true,
 		},
 	},
-};
+});
 
 // ? uncomment only when generating better-auth schema via `bunx @better-auth/cli generate`
 
