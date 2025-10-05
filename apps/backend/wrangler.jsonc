@@ -4,7 +4,7 @@
  */
 {
 	"$schema": "node_modules/wrangler/config-schema.json",
-	"name": "mono-saas-backend",
+	"name": "expedition-backend",
 	"main": "src/index.ts",
 	"compatibility_date": "2025-08-23",
 	"assets": {
@@ -28,8 +28,13 @@
 	"d1_databases": [
 		{
 			"binding": "DB",
-			"database_name": "mono-saas_DB",
+			"database_name": "expedition_DB",
 			"database_id": "f4063bb7-c5bc-4e97-b6c5-ddc6016245de"
+		},
+		{
+			"binding": "DB",
+			"database_name": "expedition",
+			"database_id": "e9534db6-4e18-416f-bacd-e0b30d0875f8"
 		}
 	]
 	/**

@@ -4,7 +4,7 @@
  */
 {
 	"$schema": "node_modules/wrangler/config-schema.json",
-	"name": "mono-saas-frontend",
+	"name": "expedition-frontend",
 	"compatibility_date": "2025-08-23",
 	"assets": {
 		"not_found_handling": "single-page-application"

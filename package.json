@@ -1,5 +1,5 @@
 {
-	"name": "mono-saas",
+	"name": "expedition",
 	"private": true,
 	"scripts": {
 		"build": "turbo run build",
