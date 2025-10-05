@@ -9,12 +9,43 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as AboutRouteImport } from './routes/about'
+import { Route as WorkoutsRouteImport } from './routes/workouts'
+import { Route as ProfileRouteImport } from './routes/profile'
+import { Route as MyExpeditionsRouteImport } from './routes/my-expeditions'
+import { Route as LandingRouteImport } from './routes/landing'
+import { Route as ExpeditionsRouteImport } from './routes/expeditions'
+import { Route as CharacterSelectionRouteImport } from './routes/character-selection'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ExpeditionIdRouteImport } from './routes/expedition.$id'
 
-const AboutRoute = AboutRouteImport.update({
-  id: '/about',
-  path: '/about',
+const WorkoutsRoute = WorkoutsRouteImport.update({
+  id: '/workouts',
+  path: '/workouts',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProfileRoute = ProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MyExpeditionsRoute = MyExpeditionsRouteImport.update({
+  id: '/my-expeditions',
+  path: '/my-expeditions',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LandingRoute = LandingRouteImport.update({
+  id: '/landing',
+  path: '/landing',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ExpeditionsRoute = ExpeditionsRouteImport.update({
+  id: '/expeditions',
+  path: '/expeditions',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CharacterSelectionRoute = CharacterSelectionRouteImport.update({
+  id: '/character-selection',
+  path: '/character-selection',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -22,40 +53,129 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ExpeditionIdRoute = ExpeditionIdRouteImport.update({
+  id: '/expedition/$id',
+  path: '/expedition/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/about': typeof AboutRoute
+  '/character-selection': typeof CharacterSelectionRoute
+  '/expeditions': typeof ExpeditionsRoute
+  '/landing': typeof LandingRoute
+  '/my-expeditions': typeof MyExpeditionsRoute
+  '/profile': typeof ProfileRoute
+  '/workouts': typeof WorkoutsRoute
+  '/expedition/$id': typeof ExpeditionIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/about': typeof AboutRoute
+  '/character-selection': typeof CharacterSelectionRoute
+  '/expeditions': typeof ExpeditionsRoute
+  '/landing': typeof LandingRoute
+  '/my-expeditions': typeof MyExpeditionsRoute
+  '/profile': typeof ProfileRoute
+  '/workouts': typeof WorkoutsRoute
+  '/expedition/$id': typeof ExpeditionIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/about': typeof AboutRoute
+  '/character-selection': typeof CharacterSelectionRoute
+  '/expeditions': typeof ExpeditionsRoute
+  '/landing': typeof LandingRoute
+  '/my-expeditions': typeof MyExpeditionsRoute
+  '/profile': typeof ProfileRoute
+  '/workouts': typeof WorkoutsRoute
+  '/expedition/$id': typeof ExpeditionIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/about'
+  fullPaths:
+    | '/'
+    | '/character-selection'
+    | '/expeditions'
+    | '/landing'
+    | '/my-expeditions'
+    | '/profile'
+    | '/workouts'
+    | '/expedition/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/about'
-  id: '__root__' | '/' | '/about'
+  to:
+    | '/'
+    | '/character-selection'
+    | '/expeditions'
+    | '/landing'
+    | '/my-expeditions'
+    | '/profile'
+    | '/workouts'
+    | '/expedition/$id'
+  id:
+    | '__root__'
+    | '/'
+    | '/character-selection'
+    | '/expeditions'
+    | '/landing'
+    | '/my-expeditions'
+    | '/profile'
+    | '/workouts'
+    | '/expedition/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AboutRoute: typeof AboutRoute
+  CharacterSelectionRoute: typeof CharacterSelectionRoute
+  ExpeditionsRoute: typeof ExpeditionsRoute
+  LandingRoute: typeof LandingRoute
+  MyExpeditionsRoute: typeof MyExpeditionsRoute
+  ProfileRoute: typeof ProfileRoute
+  WorkoutsRoute: typeof WorkoutsRoute
+  ExpeditionIdRoute: typeof ExpeditionIdRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/about': {
-      id: '/about'
-      path: '/about'
-      fullPath: '/about'
-      preLoaderRoute: typeof AboutRouteImport
+    '/workouts': {
+      id: '/workouts'
+      path: '/workouts'
+      fullPath: '/workouts'
+      preLoaderRoute: typeof WorkoutsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/profile': {
+      id: '/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof ProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/my-expeditions': {
+      id: '/my-expeditions'
+      path: '/my-expeditions'
+      fullPath: '/my-expeditions'
+      preLoaderRoute: typeof MyExpeditionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/landing': {
+      id: '/landing'
+      path: '/landing'
+      fullPath: '/landing'
+      preLoaderRoute: typeof LandingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/expeditions': {
+      id: '/expeditions'
+      path: '/expeditions'
+      fullPath: '/expeditions'
+      preLoaderRoute: typeof ExpeditionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/character-selection': {
+      id: '/character-selection'
+      path: '/character-selection'
+      fullPath: '/character-selection'
+      preLoaderRoute: typeof CharacterSelectionRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -65,12 +185,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/expedition/$id': {
+      id: '/expedition/$id'
+      path: '/expedition/$id'
+      fullPath: '/expedition/$id'
+      preLoaderRoute: typeof ExpeditionIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AboutRoute: AboutRoute,
+  CharacterSelectionRoute: CharacterSelectionRoute,
+  ExpeditionsRoute: ExpeditionsRoute,
+  LandingRoute: LandingRoute,
+  MyExpeditionsRoute: MyExpeditionsRoute,
+  ProfileRoute: ProfileRoute,
+  WorkoutsRoute: WorkoutsRoute,
+  ExpeditionIdRoute: ExpeditionIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -48,3 +48,5 @@ bunx prisma migrate diff \
 1. run script `./prisma/generate-migration.sh create_[name]_table` with proper argument
 2. run migration to D1 with e.g. `bunx wrangler d1 migrations apply [DB_NAME] --local`
 3. `bunx prisma generate`
+
+./prisma/generate-migration.sh [name] && bunx wrangler d1 migrations apply DB --local && bunx prisma generate

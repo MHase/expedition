@@ -7,7 +7,6 @@
 generator client {
   provider        = "prisma-client-js"
   output          = "../src/generated/prisma"
-  previewFeatures = ["driverAdapters"]
 }
 
 datasource db {
@@ -73,4 +72,157 @@ model Verification {
   updatedAt  DateTime?
 
   @@map("verification")
+}
+
+// User Profile (extends User with expedition data)
+model UserProfile {
+  id              String   @id
+  userId          String   @unique
+  characterClassId String?
+  totalPoints     Int      @default(0)
+  level           Int      @default(1)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  characterClass  CharacterClass? @relation(fields: [characterClassId], references: [id])
+  expeditions     UserExpedition[]
+  workouts        Workout[]
+  artifacts       UserArtifact[]
+  createdExpeditions Expedition[] @relation("ExpeditionCreator")
+
+  @@map("user_profile")
+}
+
+// Character Classes
+model CharacterClass {
+  id          String   @id
+  name        String
+  description String
+  perks       String   // JSON string of perks
+  soloMultiplier Float @default(0.7) // Penalty for solo workouts
+  groupMultiplier Float @default(1.0) // Bonus for group workouts
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  userProfiles UserProfile[]
+
+  @@map("character_class")
+}
+
+// Expeditions
+model Expedition {
+  id              String    @id
+  name            String
+  description     String?
+  targetPoints    Int
+  duration        Int       // Duration in days
+  isPublic        Boolean   @default(true)
+  inviteCode      String?   @unique
+  startDate       DateTime
+  endDate         DateTime
+  status          String    @default("upcoming") // upcoming, active, completed, failed
+  createdById     String
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  participants    UserExpedition[]
+  workouts        Workout[]
+  creator         UserProfile @relation("ExpeditionCreator", fields: [createdById], references: [id])
+
+  @@map("expedition")
+}
+
+// User-Expedition relationship
+model UserExpedition {
+  id           String     @id
+  userProfileId String
+  expeditionId String
+  joinedAt     DateTime   @default(now())
+  pointsEarned Int        @default(0)
+  isActive     Boolean    @default(true)
+  
+  userProfile  UserProfile @relation(fields: [userProfileId], references: [id], onDelete: Cascade)
+  expedition   Expedition @relation(fields: [expeditionId], references: [id], onDelete: Cascade)
+  
+  @@unique([userProfileId, expeditionId])
+  @@map("user_expedition")
+}
+
+// Workouts
+model Workout {
+  id           String    @id
+  userProfileId String
+  expeditionId String?
+  exerciseType String    // e.g., "running", "weightlifting", "yoga"
+  duration     Int       // Duration in minutes
+  metValue     Float     // MET value for the exercise
+  points       Float     // Calculated points
+  isSolo       Boolean   @default(true)
+  isPublic     Boolean   @default(false)
+  notes        String?
+  workoutDate  DateTime  // Date when workout was performed
+  loggedAt     DateTime  @default(now())
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  
+  userProfile  UserProfile @relation(fields: [userProfileId], references: [id], onDelete: Cascade)
+  expedition   Expedition? @relation(fields: [expeditionId], references: [id], onDelete: SetNull)
+  photos       WorkoutPhoto[]
+
+  @@map("workout")
+}
+
+// Workout Photos
+model WorkoutPhoto {
+  id        String   @id
+  workoutId String
+  url       String   // Cloudflare R2 URL
+  caption   String?
+  createdAt DateTime @default(now())
+  
+  workout   Workout  @relation(fields: [workoutId], references: [id], onDelete: Cascade)
+
+  @@map("workout_photo")
+}
+
+// Artifacts (Rewards)
+model Artifact {
+  id          String   @id
+  name        String
+  description String
+  rarity      String   // common, rare, epic, legendary
+  pointsValue Int      // Points required to earn this artifact
+  imageUrl    String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  userArtifacts UserArtifact[]
+
+  @@map("artifact")
+}
+
+// User Artifacts (User's earned artifacts)
+model UserArtifact {
+  id         String    @id
+  userProfileId String
+  artifactId String
+  earnedAt   DateTime  @default(now())
+  expeditionId String? // Which expedition earned this artifact
+  
+  userProfile UserProfile @relation(fields: [userProfileId], references: [id], onDelete: Cascade)
+  artifact   Artifact  @relation(fields: [artifactId], references: [id], onDelete: Cascade)
+
+  @@map("user_artifact")
+}
+
+// Exercise Types and MET Values
+model ExerciseType {
+  id        String   @id
+  name      String   @unique
+  metValue  Float    // MET value for this exercise
+  category  String   // cardio, strength, flexibility, etc.
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("exercise_type")
 }

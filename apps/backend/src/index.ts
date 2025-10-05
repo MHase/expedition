@@ -3,6 +3,12 @@ import { cors } from "hono/cors";
 import { secureHeaders } from "hono/secure-headers";
 import { getClient } from "./lib/prisma";
 import { authRoutes } from "./routes/auth";
+import { characterClassRoutes } from "./routes/character-classes";
+import { exerciseTypeRoutes } from "./routes/exercise-types";
+import { expeditionRoutes } from "./routes/expeditions";
+import { userDeletionRoutes } from "./routes/user-deletion";
+import { userProfileRoutes } from "./routes/user-profiles";
+import { workoutRoutes } from "./routes/workouts";
 
 export type HonoEnv = {
 	Bindings: {
@@ -44,5 +50,11 @@ app.get("/all", async (c) => {
 });
 
 app.route("/auth", authRoutes);
+app.route("/character-classes", characterClassRoutes);
+app.route("/user-profiles", userProfileRoutes);
+app.route("/expeditions", expeditionRoutes);
+app.route("/exercise-types", exerciseTypeRoutes);
+app.route("/workouts", workoutRoutes);
+app.route("/user-deletion", userDeletionRoutes);
 
 export default app;
