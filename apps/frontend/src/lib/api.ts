@@ -7,22 +7,8 @@ export const apiClient = axios.create({
 	headers: {
 		"Content-Type": "application/json",
 	},
+	withCredentials: true,
 });
-
-// Request interceptor for adding auth tokens if needed
-apiClient.interceptors.request.use(
-	(config) => {
-		// Add auth token if available
-		// const token = localStorage.getItem('auth-token');
-		// if (token) {
-		//   config.headers.Authorization = `Bearer ${token}`;
-		// }
-		return config;
-	},
-	(error) => {
-		return Promise.reject(error);
-	},
-);
 
 // Response interceptor for error handling
 apiClient.interceptors.response.use(
