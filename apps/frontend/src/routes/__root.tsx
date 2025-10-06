@@ -80,7 +80,11 @@ export const Route = createRootRoute({
 									</Link>
 									<Button
 										onClick={() =>
-											authClient.signIn.social({ provider: "google" })
+											authClient.signIn.social({
+												provider: "google",
+												callbackURL:
+													import.meta.env.VITE_FRONTEND_URL + "/expeditions",
+											})
 										}
 										size="sm"
 									>

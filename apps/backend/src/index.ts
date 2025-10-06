@@ -33,9 +33,12 @@ app.use(secureHeaders());
 // https://www.better-auth.com/docs/integrations/hono#cors
 app.use(
 	cors({
-		origin: "http://localhost:5173", // replace with your origin
+		origin: [
+			"http://localhost:5173",
+			"https://expedition-frontend.sykula.workers.dev",
+		], // replace with your origin
 		allowHeaders: ["Content-Type", "Authorization"],
-		allowMethods: ["POST", "GET", "OPTIONS"],
+		allowMethods: ["POST", "GET", "PUT", "DELETE", "OPTIONS"],
 		exposeHeaders: ["Content-Length"],
 		maxAge: 600,
 		credentials: true,

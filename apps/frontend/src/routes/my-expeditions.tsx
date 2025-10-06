@@ -140,9 +140,8 @@ function MyExpeditions() {
 					) : (
 						<div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 							{userExpeditions.map((userExpedition) => {
+								console.log(userExpedition);
 								const expedition = userExpedition.expedition;
-								const isCreator =
-									expedition.createdById === userProfile?.userId;
 
 								return (
 									<Card
@@ -248,37 +247,33 @@ function MyExpeditions() {
 											</div>
 
 											{/* Invite Code for Private Expeditions */}
-											{!expedition.isPublic &&
-												expedition.inviteCode &&
-												isCreator && (
-													<div className="mb-4 p-3 bg-gray-50 rounded-lg">
-														<div className="flex items-center justify-between">
-															<div>
-																<div className="text-sm font-medium text-gray-700">
-																	Invite Code
-																</div>
-																<div className="text-lg font-mono text-gray-900">
-																	{expedition.inviteCode}
-																</div>
+											{!expedition.isPublic && expedition.inviteCode && (
+												<div className="mb-4 p-3 bg-gray-50 rounded-lg">
+													<div className="flex items-center justify-between">
+														<div>
+															<div className="text-sm font-medium text-gray-700">
+																Invite Code
 															</div>
-															<Button
-																variant="outline"
-																size="sm"
-																onClick={() =>
-																	copyInviteCode(expedition.inviteCode || "")
-																}
-															>
-																{copiedCodes.has(
-																	expedition.inviteCode || "",
-																) ? (
-																	<Check className="h-4 w-4" />
-																) : (
-																	<Copy className="h-4 w-4" />
-																)}
-															</Button>
+															<div className="text-lg font-mono text-gray-900">
+																{expedition.inviteCode}
+															</div>
 														</div>
+														<Button
+															variant="outline"
+															size="sm"
+															onClick={() =>
+																copyInviteCode(expedition.inviteCode || "")
+															}
+														>
+															{copiedCodes.has(expedition.inviteCode || "") ? (
+																<Check className="h-4 w-4" />
+															) : (
+																<Copy className="h-4 w-4" />
+															)}
+														</Button>
 													</div>
-												)}
+												</div>
+											)}
 
 											<div className="flex items-center justify-between">
 												<div className="text-sm text-gray-500">

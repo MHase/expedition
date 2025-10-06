@@ -8,7 +8,10 @@ const config = (env: HonoEnv["Bindings"]) => ({
 		enabled: false,
 	},
 	baseURL: env.BETTER_AUTH_URL,
-	trustedOrigins: ["http://localhost:5173"],
+	trustedOrigins: [
+		"http://localhost:5173",
+		"https://expedition-frontend.sykula.workers.dev",
+	],
 	/**
 	 * Base path for the better auth. This is typically
 	 * the path where the

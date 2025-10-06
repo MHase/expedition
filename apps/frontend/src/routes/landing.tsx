@@ -28,7 +28,7 @@ function Landing() {
 	const handleGoogleSignIn = () => {
 		authClient.signIn.social({
 			provider: "google",
-			callbackURL: "http://localhost:5173",
+			callbackURL: import.meta.env.VITE_FRONTEND_URL + "/expeditions",
 		});
 	};
 
