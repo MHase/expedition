@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useId, useState } from "react";
+import { useCallback, useEffect, useId, useMemo, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -20,7 +20,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { authClient } from "@/lib/auth-client";
 import { useExerciseTypes } from "@/lib/hooks/useExerciseTypes";
 import { useUserProfile } from "@/lib/hooks/useUserProfile";
-import { useCalculatePoints, useCreateWorkout } from "@/lib/hooks/useWorkouts";
+import {
+	useCalculatePoints,
+	useCreateWorkout,
+	useUserWorkouts,
+} from "@/lib/hooks/useWorkouts";
 
 interface WorkoutLogFormProps {
 	expeditionId?: string;
@@ -40,27 +44,14 @@ export function WorkoutLogForm({
 
 	const exerciseTypeId = useId();
 	const durationId = useId();
-	const dateId = useId();
-	const timeId = useId();
+	// Task: Remove date/time inputs and default to NOW
+	// const dateId = useId();
+	// const timeId = useId();
 	const notesId = useId();
 	const visibilityId = useId();
 
-	// Helper function to get local date in YYYY-MM-DD format
-	const getLocalDateString = () => {
-		const now = new Date();
-		const year = now.getFullYear();
-		const month = String(now.getMonth() + 1).padStart(2, "0");
-		const day = String(now.getDate()).padStart(2, "0");
-		return `${year}-${month}-${day}`;
-	};
-
-	// Helper function to get local time in HH:MM format
-	const getLocalTimeString = () => {
-		const now = new Date();
-		const hours = String(now.getHours()).padStart(2, "0");
-		const minutes = String(now.getMinutes()).padStart(2, "0");
-		return `${hours}:${minutes}`;
-	};
+	// Task: Remove date/time inputs and default to NOW
+	// (No date/time helpers needed)
 
 	const [formData, setFormData] = useState({
 		exerciseType: "",
@@ -68,8 +59,6 @@ export function WorkoutLogForm({
 		notes: "",
 		isSolo: !expeditionId, // If expeditionId exists, it's a group workout (solo: false)
 		isPublic: false,
-		workoutDate: getLocalDateString(),
-		workoutTime: getLocalTimeString(),
 	});
 
 	const [selectedExercise, setSelectedExercise] = useState<{
@@ -108,8 +97,7 @@ export function WorkoutLogForm({
 		formData.duration,
 		formData.isSolo,
 		userProfile?.id,
-		// calculatePoints.isPending,
-		// calculatePoints.mutate,
+		calculatePoints.mutate,
 	]);
 
 	// Calculate points when exercise type or duration changes
@@ -133,6 +121,37 @@ export function WorkoutLogForm({
 		handleInputChange("exerciseType", exerciseName);
 	};
 
+	// Task: Workout logging select - show recent/last used from workout history (not localStorage)
+	const { data: userHistory } = useUserWorkouts(
+		userProfile?.id || "",
+		expeditionId,
+	);
+	const recentExercises = useMemo<string[]>(() => {
+		if (!userHistory || userHistory.length === 0) return [];
+		const seen = new Set<string>();
+		const ordered: string[] = [];
+		for (const w of userHistory) {
+			const name = w.exerciseType;
+			if (!seen.has(name)) {
+				seen.add(name);
+				ordered.push(name);
+				if (ordered.length >= 8) break;
+			}
+		}
+		return ordered;
+	}, [userHistory]);
+
+	const orderedExerciseTypes = useMemo(() => {
+		if (!exerciseTypes || recentExercises.length === 0)
+			return exerciseTypes || [];
+		const byName = new Map(exerciseTypes.map((e) => [e.name, e] as const));
+		const recent = recentExercises
+			.map((name) => byName.get(name))
+			.filter(Boolean) as typeof exerciseTypes;
+		const rest = exerciseTypes.filter((e) => !recentExercises.includes(e.name));
+		return [...recent, ...rest];
+	}, [exerciseTypes, recentExercises]);
+
 	const handleSubmit = (e: React.FormEvent) => {
 		e.preventDefault();
 
@@ -141,10 +160,8 @@ export function WorkoutLogForm({
 			return;
 		}
 
-		// Create date in local timezone to avoid timezone conversion issues
-		const [year, month, day] = formData.workoutDate.split("-").map(Number);
-		const [hours, minutes] = formData.workoutTime.split(":").map(Number);
-		const workoutDateTime = new Date(year, month - 1, day, hours, minutes);
+		// Task: Remove date/time inputs and default to NOW
+		const workoutDateTime = new Date();
 
 		createWorkout.mutate(
 			{
@@ -161,6 +178,7 @@ export function WorkoutLogForm({
 			},
 			{
 				onSuccess: () => {
+					// Task: Workout logging select - use workout history (no localStorage persistence)
 					// Reset form
 					setFormData({
 						exerciseType: "",
@@ -168,8 +186,6 @@ export function WorkoutLogForm({
 						notes: "",
 						isSolo: !expeditionId, // Reset based on expedition context
 						isPublic: false,
-						workoutDate: getLocalDateString(),
-						workoutTime: getLocalTimeString(),
 					});
 					setSelectedExercise(null);
 					setCalculatedPoints(null);
@@ -218,7 +234,8 @@ export function WorkoutLogForm({
 									<SelectValue placeholder="Select exercise type" />
 								</SelectTrigger>
 								<SelectContent>
-									{exerciseTypes?.map((exercise) => (
+									{/* Task: Workout logging select - show recent/last used at the top */}
+									{orderedExerciseTypes?.map((exercise) => (
 										<SelectItem key={exercise.id} value={exercise.name}>
 											{exercise.name} (MET: {exercise.metValue})
 										</SelectItem>
@@ -244,36 +261,7 @@ export function WorkoutLogForm({
 						</div>
 					</div>
 
-					<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-						<div className="space-y-2">
-							<label htmlFor={dateId} className="text-sm font-medium">
-								Date
-							</label>
-							<Input
-								id={dateId}
-								type="date"
-								value={formData.workoutDate}
-								onChange={(e) =>
-									handleInputChange("workoutDate", e.target.value)
-								}
-								max={new Date().toISOString().split("T")[0]}
-							/>
-						</div>
-
-						<div className="space-y-2">
-							<label htmlFor={timeId} className="text-sm font-medium">
-								Time
-							</label>
-							<Input
-								id={timeId}
-								type="time"
-								value={formData.workoutTime}
-								onChange={(e) =>
-									handleInputChange("workoutTime", e.target.value)
-								}
-							/>
-						</div>
-					</div>
+					{/* Task: Remove date/time inputs and default to NOW */}
 
 					<div className="space-y-2">
 						<label htmlFor={notesId} className="text-sm font-medium">

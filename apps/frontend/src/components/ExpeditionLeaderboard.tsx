@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/card";
 import { authClient } from "@/lib/auth-client";
 import { useExpeditionLeaderboard } from "@/lib/hooks/useExpeditions";
+import { userStringToColorHex } from "@/lib/utils";
 
 interface ExpeditionLeaderboardProps {
 	expeditionId: string;
@@ -126,16 +127,33 @@ export function ExpeditionLeaderboard({
 								</div>
 								<div className="flex-1">
 									<div className="flex items-center gap-2">
-										<span className="font-semibold">
-											{isCurrentUser(participant.userProfile.userId)
-												? "You"
-												: "Participant"}
-										</span>
-										{participant.userProfile.characterClass && (
+										{/* Task: Leaderboard - show names instead of generic labels */}
+										{(() => {
+											const you = isCurrentUser(participant.userProfile.userId);
+											const displayName =
+												(you && session?.user?.name) ||
+												participant.userProfile.userName ||
+												`User ${participant.userProfile.userId.slice(0, 6)}`;
+											const color = userStringToColorHex(
+												(you && session?.user?.name) ||
+													participant.userProfile.userName ||
+													`user-${participant.userProfile.userId}`,
+											);
+											return (
+												<>
+													<span
+														className="inline-block w-3 h-3 rounded-sm"
+														style={{ backgroundColor: color }}
+													/>
+													<span className="font-semibold">{displayName}</span>
+												</>
+											);
+										})()}
+										{/* {participant.userProfile.characterClass && (
 											<Badge variant="outline" className="text-xs">
 												{participant.userProfile.characterClass.name}
 											</Badge>
-										)}
+										)} */}
 										{!participant.isActive && (
 											<Badge variant="destructive" className="text-xs">
 												Inactive

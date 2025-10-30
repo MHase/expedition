@@ -33,7 +33,35 @@ app.get("/public", async (c) => {
 			orderBy: { startDate: "asc" },
 		});
 
-		return c.json(expeditions);
+		// Task: Attach userName to userProfile for safe frontend display
+		const allIds = new Set<string>();
+		for (const e of expeditions) {
+			for (const p of e.participants) {
+				allIds.add(p.userProfile.userId);
+			}
+			allIds.add(e.creator.userId);
+		}
+		const users = await prisma.user.findMany({
+			where: { id: { in: Array.from(allIds) } },
+			select: { id: true, name: true },
+		});
+		const idToName = new Map(users.map((u) => [u.id, u.name] as const));
+		const withNames = expeditions.map((e) => ({
+			...e,
+			participants: e.participants.map((p) => ({
+				...p,
+				userProfile: {
+					...p.userProfile,
+					userName: idToName.get(p.userProfile.userId) || null,
+				},
+			})),
+			creator: {
+				...e.creator,
+				userName: idToName.get(e.creator.userId) || null,
+			},
+		}));
+
+		return c.json(withNames);
 	} catch (error) {
 		console.error("Error fetching public expeditions:", error);
 		return c.json({ error: "Failed to fetch public expeditions" }, 500);
@@ -81,7 +109,44 @@ app.get("/:id", async (c) => {
 			return c.json({ error: "Expedition not found" }, 404);
 		}
 
-		return c.json(expedition);
+		// Attach userName to userProfile entries
+		const ids = new Set<string>();
+		const expAny: any = expedition as any;
+		(expAny.participants || []).forEach((p: any) => {
+			ids.add(p.userProfile.userId);
+		});
+		expedition.workouts?.forEach((w) => {
+			ids.add(w.userProfile.userId);
+		});
+		ids.add(expedition.creator.userId);
+		const users = await prisma.user.findMany({
+			where: { id: { in: Array.from(ids) } },
+			select: { id: true, name: true },
+		});
+		const idToName = new Map(users.map((u) => [u.id, u.name] as const));
+		const withNames = {
+			...expedition,
+			participants: expedition.participants.map((p) => ({
+				...p,
+				userProfile: {
+					...p.userProfile,
+					userName: idToName.get(p.userProfile.userId) || null,
+				},
+			})),
+			workouts: expedition.workouts?.map((w) => ({
+				...w,
+				userProfile: {
+					...w.userProfile,
+					userName: idToName.get(w.userProfile.userId) || null,
+				},
+			})),
+			creator: {
+				...expedition.creator,
+				userName: idToName.get(expedition.creator.userId) || null,
+			},
+		};
+
+		return c.json(withNames);
 	} catch (error) {
 		console.error("Error fetching expedition:", error);
 		return c.json({ error: "Failed to fetch expedition" }, 500);
@@ -96,6 +161,17 @@ app.get("/:id/leaderboard", async (c) => {
 	try {
 		const expedition = await prisma.expedition.findUnique({
 			where: { id },
+			include: {
+				participants: {
+					include: {
+						userProfile: {
+							include: {
+								characterClass: true,
+							},
+						},
+					},
+				},
+			},
 		});
 
 		if (!expedition) {
@@ -114,7 +190,24 @@ app.get("/:id/leaderboard", async (c) => {
 			orderBy: { pointsEarned: "desc" },
 		});
 
-		return c.json(participants);
+		// Attach userName to userProfile entries
+		const ids = Array.from(
+			new Set(participants.map((p) => p.userProfile.userId)),
+		);
+		const users = await prisma.user.findMany({
+			where: { id: { in: ids } },
+			select: { id: true, name: true },
+		});
+		const idToName = new Map(users.map((u) => [u.id, u.name] as const));
+		const withNames = participants.map((p) => ({
+			...p,
+			userProfile: {
+				...p.userProfile,
+				userName: idToName.get(p.userProfile.userId) || null,
+			},
+		}));
+
+		return c.json(withNames);
 	} catch (error) {
 		console.error("Error fetching expedition leaderboard:", error);
 		return c.json({ error: "Failed to fetch expedition leaderboard" }, 500);
@@ -129,6 +222,17 @@ app.get("/:id/progress", async (c) => {
 	try {
 		const expedition = await prisma.expedition.findUnique({
 			where: { id },
+			include: {
+				participants: {
+					include: {
+						userProfile: {
+							include: {
+								characterClass: true,
+							},
+						},
+					},
+				},
+			},
 		});
 
 		if (!expedition) {
@@ -170,13 +274,45 @@ app.get("/:id/progress", async (c) => {
 			take: 10,
 		});
 
+		// Attach userName to related userProfiles
+		const ids = new Set<string>();
+		const expAny: any = expedition as any;
+		for (const p of expAny.participants || []) {
+			ids.add(p.userProfile.userId);
+		}
+		for (const w of recentWorkouts) {
+			ids.add(w.userProfile.userId);
+		}
+		const users = await prisma.user.findMany({
+			where: { id: { in: Array.from(ids) } },
+			select: { id: true, name: true },
+		});
+		const idToName = new Map(users.map((u) => [u.id, u.name] as const));
+		const expeditionWithParticipantNames = {
+			...expedition,
+			participants: (expAny.participants || []).map((p: any) => ({
+				...p,
+				userProfile: {
+					...p.userProfile,
+					userName: idToName.get(p.userProfile.userId) || null,
+				},
+			})),
+		};
+		const recentWithNames = recentWorkouts.map((w) => ({
+			...w,
+			userProfile: {
+				...w.userProfile,
+				userName: idToName.get(w.userProfile.userId) || null,
+			},
+		}));
+
 		return c.json({
-			expedition,
+			expedition: expeditionWithParticipantNames,
 			totalPoints: totalPoints._sum.pointsEarned || 0,
 			targetPoints: expedition.targetPoints,
 			progressPercentage: Math.round(progressPercentage * 100) / 100,
 			participantCount,
-			recentWorkouts,
+			recentWorkouts: recentWithNames,
 		});
 	} catch (error) {
 		console.error("Error fetching expedition progress:", error);

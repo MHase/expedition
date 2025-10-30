@@ -7,7 +7,9 @@ import {
 	CardTitle,
 } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import { authClient } from "@/lib/auth-client";
 import { useExpeditionProgress } from "@/lib/hooks/useExpeditions";
+import { userStringToColorHex } from "@/lib/utils";
 
 interface ExpeditionDashboardProps {
 	expeditionId: string;
@@ -16,6 +18,7 @@ interface ExpeditionDashboardProps {
 export function ExpeditionDashboard({
 	expeditionId,
 }: ExpeditionDashboardProps) {
+	const { data: session } = authClient.useSession();
 	const {
 		data: progress,
 		isLoading,
@@ -130,6 +133,64 @@ export function ExpeditionDashboard({
 						</div>
 						<Progress value={progressPercentage} className="h-2" />
 					</div>
+
+					{/* Task: Use color per user and show contributions with usernames */}
+					{expedition.participants && expedition.participants.length > 0 && (
+						<div className="mt-4 space-y-2">
+							<div className="text-sm text-gray-600">Contributions</div>
+							<div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden flex">
+								{expedition.participants
+									.filter((p) => p.pointsEarned > 0)
+									.map((p) => {
+										const isYou = session?.user?.id === p.userProfile.userId;
+
+										const total = Math.max(1, totalPoints);
+										const pct = Math.min(100, (p.pointsEarned / total) * 100);
+										const color = userStringToColorHex(
+											(isYou && session?.user?.name) ||
+												p.userProfile.userName ||
+												`user-${p.userProfile.userId}`,
+										);
+										return (
+											<div
+												key={p.id}
+												title={`${pct.toFixed(1)}%`}
+												style={{ width: `${pct}%`, backgroundColor: color }}
+												className="h-3"
+											/>
+										);
+									})}
+							</div>
+							<div className="flex flex-wrap gap-3 text-xs text-gray-700">
+								{expedition.participants.map((p) => {
+									const isYou = session?.user?.id === p.userProfile.userId;
+									const displayName =
+										(isYou && session?.user?.name) ||
+										p.userProfile.userName ||
+										// Task: Progress - show usernames; fallback to id snippet if unknown
+										`User ${p.userProfile.userId.slice(0, 6)}`;
+									const color = userStringToColorHex(
+										(isYou && session?.user?.name) ||
+											p.userProfile.userName ||
+											`user-${p.userProfile.userId}`,
+									);
+									const total = Math.max(1, totalPoints);
+									const pct = Math.min(100, (p.pointsEarned / total) * 100);
+									return (
+										<div key={p.id} className="flex items-center gap-2">
+											<span
+												className="inline-block w-3 h-3 rounded-sm"
+												style={{ backgroundColor: color }}
+											/>
+											<span>
+												{displayName}: {pct.toFixed(1)}%
+											</span>
+										</div>
+									);
+								})}
+							</div>
+						</div>
+					)}
 
 					<div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 text-sm text-gray-600">
 						<div>

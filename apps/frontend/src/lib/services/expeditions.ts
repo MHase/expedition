@@ -23,6 +23,7 @@ export interface Expedition {
 		userProfile: {
 			id: string;
 			userId: string;
+			userName?: string | null;
 			totalPoints: number;
 			level: number;
 			characterClass: CharacterClass | null;
@@ -31,6 +32,7 @@ export interface Expedition {
 	creator: {
 		id: string;
 		userId: string;
+		userName?: string | null;
 		totalPoints: number;
 		level: number;
 		characterClass: CharacterClass | null;
@@ -82,6 +84,7 @@ export interface UserExpedition {
 	userProfile: {
 		id: string;
 		userId: string;
+		userName?: string | null;
 		totalPoints: number;
 		level: number;
 		characterClass: CharacterClass | null;
@@ -104,6 +107,7 @@ export interface ExpeditionProgress {
 		userProfile: {
 			id: string;
 			userId: string;
+			userName?: string | null;
 			characterClass: CharacterClass | null;
 		};
 	}>;
